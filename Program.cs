@@ -2,6 +2,7 @@ using Amazon.CloudWatchLogs;
 using Routes;
 using Serilog;
 using Serilog.Sinks.AwsCloudWatch;
+using Serilog.Sinks.OpenTelemetry;
 using YaushServer.Url;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -46,17 +47,49 @@ app.Run();
 
 static void ConfigureLogging(WebApplicationBuilder builder)
 {
-    var client = new AmazonCloudWatchLogsClient();
-
     builder.Logging.ClearProviders();
-    Serilog.ILogger logger = new LoggerConfiguration()
-        .WriteTo.Console()
-        .WriteTo.AmazonCloudWatch(
-            logGroup: $"{builder.Environment.EnvironmentName}/{builder.Environment.ApplicationName}",
-            logStreamPrefix: DateTime.Now.ToString("yyyyMMddHHmmssfff"),
-            cloudWatchClient: client
+    Serilog.ILogger logger;
+
+    if (builder.Environment.IsDevelopment())
+    {
+        logger = new LoggerConfiguration()
+            .Enrich.FromLogContext()
+            .WriteTo.Console()
+            .WriteTo.OpenTelemetry(opt =>
+            {
+                opt.IncludedData =
+                    IncludedData.SpanIdField
+                    | IncludedData.TraceIdField
+                    | IncludedData.TemplateBody
+                    | IncludedData.MessageTemplateTextAttribute
+                    | IncludedData.MessageTemplateMD5HashAttribute;
+
+                opt.ResourceAttributes = new Dictionary<string, object>
+                {
+                    { "service.name", builder.Environment.ApplicationName }
+                };
+
+                opt.Endpoint = "http://localhost:5341/ingest/otlp/v1/logs";
+                opt.Protocol = OtlpProtocol.HttpProtobuf;
+                opt.Headers = new Dictionary<string, string>
+                {
+                    { "X-Seq-ApiKey", "SEQ_API_KEY" },
+                };
+            })
+            .CreateLogger();
+    }
+    else
+    {
+        var client = new AmazonCloudWatchLogsClient();
+        logger = new LoggerConfiguration()
+            .WriteTo.AmazonCloudWatch(
+                logGroup: $"{builder.Environment.EnvironmentName}/{builder.Environment.ApplicationName}",
+                logStreamPrefix: DateTime.Now.ToString("yyyyMMddHHmmssfff"),
+                cloudWatchClient: client
             )
         .CreateLogger();
+    }
+
     builder.Services.AddSerilog(logger);
 }
 
