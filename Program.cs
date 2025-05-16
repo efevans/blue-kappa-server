@@ -10,11 +10,13 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 ConfigureLogging(builder);
+builder.Services.AddNpgsqlDataSource("Host=localhost;Username=postgres;Password=abc123;Database=postgres");
 
+builder.Services.AddSingleton<IUrlRepository,  UrlRepository>();
 builder.Services.AddScoped<ICreateUrlService, CreateUrlService>();
+builder.Services.AddScoped<IGetUrlService, GetUrlService>();
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -27,7 +29,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
@@ -36,11 +37,7 @@ app.UseSerilogRequestLogging();
 
 app.MapControllers();
 
-app.MapGet("/", async (ICreateUrlService createUrlService, ILogger<DefaultRoute> logger) =>
-{
-    logger.LogInformation("At Minimal Endpoint");
-    await createUrlService.CreateUrl("https://google.com");
-});
+app.RegisterUrlEndpoints();
 
 app.Run();
 
@@ -73,7 +70,7 @@ static void ConfigureLogging(WebApplicationBuilder builder)
                 opt.Protocol = OtlpProtocol.HttpProtobuf;
                 opt.Headers = new Dictionary<string, string>
                 {
-                    { "X-Seq-ApiKey", "SEQ_API_KEY" },
+                    { "X-Seq-ApiKey", "9HGGs1Zr2pW5CpPZuFyG" },
                 };
             })
             .CreateLogger();
