@@ -1,5 +1,4 @@
 using Amazon.CloudWatchLogs;
-using Routes;
 using Serilog;
 using Serilog.Sinks.AwsCloudWatch;
 using Serilog.Sinks.OpenTelemetry;
@@ -90,9 +89,4 @@ static void ConfigureLogging(WebApplicationBuilder builder)
     }
 
     builder.Services.AddSerilog(logger);
-}
-
-namespace Routes
-{
-    public class DefaultRoute { }
 }
