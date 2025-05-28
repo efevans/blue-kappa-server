@@ -1,7 +1,9 @@
 using Amazon.CloudWatchLogs;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Sinks.AwsCloudWatch;
 using Serilog.Sinks.OpenTelemetry;
+using YaushServer.Infrastructure;
 using YaushServer.Url;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,13 +11,12 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 ConfigureLogging(builder);
-builder.Services.AddNpgsqlDataSource(
-    $"Host={builder.Configuration["YaushDB:Host"]};" +
-    $"Username={builder.Configuration["YaushDB:Username"]};" +
-    $"Password={builder.Configuration["YaushDB:Password"]};" +
-    $"Database=yaush");
+Console.WriteLine($"conn str: {builder.Configuration.GetConnectionString("YaushDB")}");
+builder.Services.AddDbContext<YaushDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("YaushDB")));
+builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddSingleton<IUrlRepository, UrlRepository>();
+builder.Services.AddScoped<IUrlRepository, UrlRepository>();
 builder.Services.AddScoped<ICreateUrlService, CreateUrlService>();
 builder.Services.AddScoped<IGetUrlService, GetUrlService>();
 
@@ -30,9 +31,19 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+
+    app.UseDeveloperExceptionPage();
+    app.UseMigrationsEndPoint();
 }
 
-//app.UseHttpsRedirection();
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+
+    var context = services.GetRequiredService<YaushDbContext>();
+    //context.Database.Migrate();
+    context.Database.EnsureCreated();
+}
 
 app.UseSerilogRequestLogging();
 
