@@ -4,7 +4,10 @@
         context: .
         args:
             BUILD_CONFIGURATION: Debug
-    ports: 
+    depends_on:
+        - db
+        - seq
+    ports:
         - 8080:80
         - 8081:443
     environment:
@@ -18,11 +21,23 @@
     image: postgres:17.5-alpine
     volumes:
         - database:/var/lib/postgres/data
+    ports: 
+        - 5432:5432
     environment:
         POSTGRES_PASSWORD: abc123
         POSTGRES_USER: yaush_server
         POSTGRES_DB: yaush
+  seq:
+    image: datalust/seq:latest
+    ports:
+        - 45341:443
+        - 5341:80
+    environment:
+        ACCEPT_EULA: Y
+    volumes:
+        - seq_data:/data
 
 
 volumes:
     database:
+    seq_data:
