@@ -1,0 +1,28 @@
+﻿services:
+  web:
+    build:
+        context: .
+        args:
+            BUILD_CONFIGURATION: Debug
+    ports: 
+        - 8080:80
+        - 8081:443
+    environment:
+        ASPNETCORE_ENVIRONMENT: Development
+        ASPNETCORE_URLS: https://*:443;http://*:80
+        ASPNETCORE_Kestrel__Certificates__Default__Password: abc123
+        ASPNETCORE_Kestrel__Certificates__Default__Path: /https/aspnetapp.pfx
+    volumes:
+        - ~/.aspnet/https:/https:ro
+  db:
+    image: postgres:17.5-alpine
+    volumes:
+        - database:/var/lib/postgres/data
+    environment:
+        POSTGRES_PASSWORD: abc123
+        POSTGRES_USER: yaush_server
+        POSTGRES_DB: yaush
+
+
+volumes:
+    database:

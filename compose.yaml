@@ -1,0 +1,12 @@
+﻿services:
+  web:
+    build:
+        context: .
+        args:
+            BUILD_CONFIGURATION: Debug
+    ports: 
+        - 8080:80
+        - 8081:443
+    environment:
+        ASPNETCORE_ENVIRONMENT: Development
+        
