@@ -1,0 +1,1 @@
+psql --host=localhost -p 5432 -U yaush_server -d yaush -f .\bootstrap_db.sql
