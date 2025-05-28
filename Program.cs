@@ -10,9 +10,13 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 ConfigureLogging(builder);
-builder.Services.AddNpgsqlDataSource("Host=localhost;Username=postgres;Password=abc123;Database=postgres");
+builder.Services.AddNpgsqlDataSource(
+    $"Host={builder.Configuration["YaushDB:Host"]};" +
+    $"Username={builder.Configuration["YaushDB:Username"]};" +
+    $"Password={builder.Configuration["YaushDB:Password"]};" +
+    $"Database=yaush");
 
-builder.Services.AddSingleton<IUrlRepository,  UrlRepository>();
+builder.Services.AddSingleton<IUrlRepository, UrlRepository>();
 builder.Services.AddScoped<ICreateUrlService, CreateUrlService>();
 builder.Services.AddScoped<IGetUrlService, GetUrlService>();
 
@@ -64,11 +68,11 @@ static void ConfigureLogging(WebApplicationBuilder builder)
                     { "service.name", builder.Environment.ApplicationName }
                 };
 
-                opt.Endpoint = "http://localhost:5341/ingest/otlp/v1/logs";
+                opt.Endpoint = "http://seq:5341/ingest/otlp/v1/logs";
                 opt.Protocol = OtlpProtocol.HttpProtobuf;
                 opt.Headers = new Dictionary<string, string>
                 {
-                    { "X-Seq-ApiKey", "9HGGs1Zr2pW5CpPZuFyG" },
+                    { "X-Seq-ApiKey", "vlynan9PEvkDza7XIB0p" },
                 };
             })
             .CreateLogger();

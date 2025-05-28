@@ -13,7 +13,7 @@ namespace YaushServer.Url
     {
         public async Task<Url?> Get(string hash)
         {
-            await using var command = _dataSource.CreateCommand("SELECT url, hash FROM links WHERE hash = $1;");
+            await using var command = _dataSource.CreateCommand("SELECT url, hash FROM urls WHERE hash = $1;");
 
             command.Parameters.Add(new NpgsqlParameter() { Value = hash });
             using var reader = await command.ExecuteReaderAsync();
