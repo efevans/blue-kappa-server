@@ -11,7 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 ConfigureLogging(builder);
-Console.WriteLine($"conn str: {builder.Configuration.GetConnectionString("YaushDB")}");
+
 builder.Services.AddDbContext<YaushDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("YaushDB")));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
@@ -20,7 +20,6 @@ builder.Services.AddScoped<IUrlRepository, UrlRepository>();
 builder.Services.AddScoped<ICreateUrlService, CreateUrlService>();
 builder.Services.AddScoped<IGetUrlService, GetUrlService>();
 
-builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -46,8 +45,6 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UseSerilogRequestLogging();
-
-app.MapControllers();
 
 app.RegisterUrlEndpoints();
 
