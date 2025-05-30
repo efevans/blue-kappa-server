@@ -1,0 +1,34 @@
+{
+  "profiles": {
+    "Docker Compose": {
+      "commandName": "DockerCompose",
+      "commandVersion": "1.0",
+      "serviceActions": {
+        "yaushserver": "StartDebugging",
+        "db": "StartWithoutDebugging",
+        "seq": "StartWithoutDebugging"
+      }
+    },
+    "Start DB/Seq": {
+      "commandName": "DockerCompose",
+      "commandVersion": "1.0",
+      "serviceActions": {
+        "db": "StartWithoutDebugging",
+        "seq": "StartWithoutDebugging",
+        "yaushserver": "DoNotStart"
+      }
+    },
+    "Start Web Server": {
+      "commandName": "DockerCompose",
+      "commandVersion": "1.0",
+      "composeLaunchAction": "LaunchBrowser",
+      "composeLaunchServiceName": "yaushserver",
+      "composeLaunchUrl": "{Scheme}://localhost:{ServicePort}/swagger",
+      "serviceActions": {
+        "db": "DoNotStart",
+        "seq": "DoNotStart",
+        "yaushserver": "StartDebugging"
+      }
+    }
+  }
+}

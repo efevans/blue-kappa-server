@@ -1,21 +1,17 @@
-﻿services:
-  web:
+services:
+  yaushserver:
+    image: ${DOCKER_REGISTRY-}yaushserver
     build:
         context: .
+        dockerfile: Web/Dockerfile
         args:
             BUILD_CONFIGURATION: Debug
-    depends_on:
-        db:
-            condition: service_healthy
-        seq:
-            condition: service_started
-
     ports:
-        - 8080:80
-        - 8081:443
+        - 8080
+        - 8081
     environment:
         ASPNETCORE_ENVIRONMENT: Development
-        ASPNETCORE_URLS: https://*:443;http://*:80
+        # ASPNETCORE_URLS: https://*:443;http://*:80
         ASPNETCORE_Kestrel__Certificates__Default__Password: ${KESTREL_CERTIFICATE_PASSWORD}
         ASPNETCORE_Kestrel__Certificates__Default__Path: /https/aspnetapp.pfx
         ASPNETCORE_ConnectionStrings__YaushDB: Host=db;Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};Database=yaush;
